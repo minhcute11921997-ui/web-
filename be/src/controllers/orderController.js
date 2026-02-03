@@ -119,15 +119,44 @@ exports.createOrder = async (req, res) => {
 exports.getMyOrders = async (req, res) => {
     try {
         const userId = req.user.userId;
+        const { page = 1, limit = 10, status = '' } = req.query;
+        const offset = (page - 1) * limit;
         
-        const [orders] = await db.query(
-            'SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC',
-            [userId]
-        );
+        // Query lấy đơn hàng
+        let query = 'SELECT * FROM orders WHERE user_id = ?';
+        let params = [userId];
+        
+        // Lọc theo trạng thái nếu có
+        if (status) {
+            query += ' AND status = ?';
+            params.push(status);
+        }
+        
+        query += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
+        params.push(parseInt(limit), parseInt(offset));
+        
+        const [orders] = await db.query(query, params);
+        
+        // Đếm tổng số đơn hàng
+        let countQuery = 'SELECT COUNT(*) as count FROM orders WHERE user_id = ?';
+        let countParams = [userId];
+        
+        if (status) {
+            countQuery += ' AND status = ?';
+            countParams.push(status);
+        }
+        
+        const [total] = await db.query(countQuery, countParams);
         
         res.json({
             success: true,
-            data: orders
+            data: orders,
+            pagination: {
+                page: parseInt(page),
+                limit: parseInt(limit),
+                total: total[0].count,
+                totalPages: Math.ceil(total[0].count / limit)
+            }
         });
     } catch (error) {
         res.status(500).json({ 
