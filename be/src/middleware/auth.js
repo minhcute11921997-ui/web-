@@ -25,7 +25,7 @@ exports.verifyToken = (req, res, next) => {
 
         // Verify token
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        
+        console.log('Decoded token:', decoded); 
         // Lưu thông tin user vào req để dùng trong controller
         req.user = decoded;
         
