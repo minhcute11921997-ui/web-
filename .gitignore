@@ -1,10 +1,10 @@
 # Dependencies
-ecommerce-backend/node_modules/
-ecommerce-frontend/node_modules/
+be/node_modules/
+fe/node_modules/
 
 # Environment variables
-ecommerce-backend/.env
-ecommerce-frontend/.env
+be/.env
+fe/.env
 
 # Logs
 *.log

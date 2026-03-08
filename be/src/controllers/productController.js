@@ -33,17 +33,29 @@ exports.getAllProducts = async (req, res) => {
 exports.getProductById = async (req, res) => {
     try {
         const [products] = await db.query(
-            'SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.id = ?',
+            `SELECT p.*, c.name as category_name 
+             FROM products p 
+             LEFT JOIN categories c ON p.category_id = c.id 
+             WHERE p.id = ?`,
             [req.params.id]
         );
+
         if (products.length === 0) {
             return res.status(404).json({ success: false, message: 'Không tìm thấy sản phẩm' });
         }
-        res.json({ success: true, data: products[0] });
+
+        // Lấy thêm thông số kỹ thuật
+        const [specs] = await db.query(
+            'SELECT spec_name, spec_value FROM product_specifications WHERE product_id = ? ORDER BY id ASC',
+            [req.params.id]
+        );
+
+        res.json({ success: true, data: { ...products[0], specifications: specs } });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Lỗi server', error: error.message });
     }
 };
+
 
 exports.createProduct = async (req, res) => {
     try {
