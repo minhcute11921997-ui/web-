@@ -5,31 +5,18 @@ import "react-toastify/dist/ReactToastify.css";
 import Navbar from "./components/Navbar";
 import PrivateRoute from "./components/PrivateRoute";
 
-<<<<<<< HEAD
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ProductsPage from "./pages/ProductsPage";
 import CartPage from "./pages/CartPage";
+import CheckoutPage from "./pages/CheckoutPage";
+import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import OrdersPage from "./pages/OrdersPage";
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminOrders from "./pages/admin/AdminOrders";
 import ProfilePage from "./pages/ProfilePage";
 import ProductDetail from "./pages/ProductDetail";
-=======
-import HomePage from './pages/HomePage';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import ProductsPage from './pages/ProductsPage';
-import CartPage from './pages/CartPage';
-import CheckoutPage from './pages/CheckoutPage';
-import PaymentSuccessPage from './pages/PaymentSuccessPage';
-import OrdersPage from './pages/OrdersPage';
-import AdminProducts from './pages/admin/AdminProducts';
-import AdminOrders from './pages/admin/AdminOrders';
-import ProfilePage from './pages/ProfilePage';
-import ProductDetail from './pages/ProductDetail';
->>>>>>> a40f485c4f90754eecea8983b31763954741269c
 
 // Component banner placeholder tái sử dụng
 const BannerPlaceholder = ({ title, to }) => (
@@ -70,12 +57,35 @@ function App() {
               <Route path="/products/:id" element={<ProductDetail />} />
 
               {/* Cần đăng nhập */}
-<<<<<<< HEAD
               <Route
                 path="/cart"
                 element={
                   <PrivateRoute>
                     <CartPage />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/checkout"
+                element={
+                  <PrivateRoute>
+                    <CheckoutPage />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/payment-success"
+                element={
+                  <PrivateRoute>
+                    <PaymentSuccessPage />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/payment-callback"
+                element={
+                  <PrivateRoute>
+                    <PaymentSuccessPage />
                   </PrivateRoute>
                 }
               />
@@ -95,26 +105,6 @@ function App() {
                   </PrivateRoute>
                 }
               />
-=======
-              <Route path="/cart" element={
-                <PrivateRoute><CartPage /></PrivateRoute>
-              } />
-              <Route path="/checkout" element={
-                <PrivateRoute><CheckoutPage /></PrivateRoute>
-              } />
-              <Route path="/payment-success" element={
-                <PrivateRoute><PaymentSuccessPage /></PrivateRoute>
-              } />
-              <Route path="/payment-callback" element={
-                <PrivateRoute><PaymentSuccessPage /></PrivateRoute>
-              } />
-              <Route path="/orders" element={
-                <PrivateRoute><OrdersPage /></PrivateRoute>
-              } />
-              <Route path="/profile" element={
-                <PrivateRoute><ProfilePage /></PrivateRoute>
-              } />
->>>>>>> a40f485c4f90754eecea8983b31763954741269c
 
               {/* Chỉ admin */}
               <Route

@@ -51,12 +51,12 @@ const ProductDetail = () => {
       {/* Main */}
       <div className="bg-white rounded-2xl shadow-md p-8 grid grid-cols-1 md:grid-cols-2 gap-10 mb-6">
         {/* Ảnh */}
-        <div className="flex items-center justify-center bg-gray-50 rounded-xl p-6 min-h-72">
+        <div className="bg-gray-50 rounded-xl overflow-hidden aspect-square">
           <img
-            src={`/images/${product.image_url}`}
+            src={product.image_url?.startsWith('http') ? product.image_url : `/images/${product.image_url}`}
             alt={product.name}
-            className="max-h-72 object-contain"
-            onError={(e) => (e.target.src = 'https://placehold.co/300x300?text=No+Image')}
+            className="w-full h-full object-cover"
+            onError={(e) => (e.target.src = 'https://placehold.co/400x400?text=No+Image')}
           />
         </div>
 

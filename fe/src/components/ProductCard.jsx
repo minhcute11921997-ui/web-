@@ -27,11 +27,13 @@ const ProductCard = ({ product }) => {
 
       {/* ✅ Toàn bộ phần trên là link */}
       <Link to={`/products/${product.id}`} className="block p-4 cursor-pointer">
-        <img
-          src={product.image_url || 'https://placehold.co/300x200?text=No+Image'}
-          alt={product.name}
-          className="w-full h-48 object-cover rounded-lg mb-3 hover:opacity-90 transition"
-        />
+        <div className="w-full aspect-square bg-gray-50 rounded-lg mb-3 overflow-hidden">
+          <img
+            src={product.image_url || 'https://placehold.co/300x200?text=No+Image'}
+            alt={product.name}
+            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+          />
+        </div>
         <h3 className="font-semibold text-base mb-1 line-clamp-2 text-gray-900 hover:text-blue-600 transition">
           {product.name}
         </h3>

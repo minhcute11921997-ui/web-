@@ -1,15 +1,9 @@
-<<<<<<< HEAD
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getAllProducts } from '../api/productApi';
 import { getAllCategories } from '../api/categoryApi';
 import useCartStore from '../store/cartStore';
 import useAuthStore from '../store/authStore';
 import { toast } from 'react-toastify';
-=======
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { Link } from 'react-router-dom';
->>>>>>> a40f485c4f90754eecea8983b31763954741269c
 
 const ITEMS_PER_PAGE = 12;
 const MIN_PRICE = 0;
@@ -78,11 +72,9 @@ export default function HomePage() {
   const [sortOption, setSortOption] = useState('id-DESC');
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-<<<<<<< HEAD
   const addItem = useCartStore(state => state.addItem);
   const token = useAuthStore(state => state.token);
   const navigate = useNavigate();
-=======
   const [hoveredCategory, setHoveredCategory] = useState(null);
   const [categoryBrandsMap, setCategoryBrandsMap] = useState({});
   const [hoverTimeout, setHoverTimeout] = useState(null);
@@ -90,7 +82,6 @@ export default function HomePage() {
   const [slideIndex, setSlideIndex] = useState(0);
   const [slidePaused, setSlidePaused] = useState(false);
   const slideInterval = useRef(null);
->>>>>>> a40f485c4f90754eecea8983b31763954741269c
 
   // Auto-slide banner
   useEffect(() => {
@@ -196,13 +187,6 @@ export default function HomePage() {
   useEffect(() => {
     setLoading(true);
     setCurrentPage(1);
-<<<<<<< HEAD
-    const params = activeCategory === 'all' ? {} : { category: activeCategory };
-
-    getAllProducts(params)
-      .then(res => {
-        if (res.data.success) setProducts(res.data.data);
-=======
 
     const params = new URLSearchParams();
     if (activeCategory !== 'all') params.append('category', activeCategory);
@@ -223,7 +207,6 @@ export default function HomePage() {
       .then(res => res.json())
       .then(data => {
         if (data.success) setProducts(data.data);
->>>>>>> a40f485c4f90754eecea8983b31763954741269c
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -543,11 +526,13 @@ export default function HomePage() {
                 
                 {/* ✅ Bọc ảnh + tên + giá trong Link */}
                 <Link to={`/products/${product.id}`} className="block p-3">
-                  <img
-                    src={product.image_url || 'https://via.placeholder.com/200'}
-                    alt={product.name}
-                    className="w-full h-40 object-cover rounded-lg mb-2 hover:opacity-90 transition"
-                  />
+                  <div className="w-full aspect-square bg-gray-50 rounded-lg mb-2 overflow-hidden">
+                    <img
+                      src={product.image_url || 'https://via.placeholder.com/200'}
+                      alt={product.name}
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
                   <h3 className="font-medium text-sm line-clamp-2 hover:text-blue-600 transition">
                     {product.name}
                   </h3>
