@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { getAllProducts } from '../api/productApi';
+import { getAllCategories } from '../api/categoryApi';
+import useCartStore from '../store/cartStore';
+import useAuthStore from '../store/authStore';
+import { toast } from 'react-toastify';
 
 const ITEMS_PER_PAGE = 12;
 
@@ -9,28 +14,42 @@ export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState('all');
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const addItem = useCartStore(state => state.addItem);
+  const token = useAuthStore(state => state.token);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    fetch('http://localhost:3000/api/categories')
-      .then(res => res.json())
-      .then(data => { if (data.success) setCategories(data.data); });
+    getAllCategories()
+      .then(res => { if (res.data.success) setCategories(res.data.data); })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
     setLoading(true);
     setCurrentPage(1);
-    const url = activeCategory === 'all'
-      ? 'http://localhost:3000/api/products'
-      : `http://localhost:3000/api/products?category=${activeCategory}`;
+    const params = activeCategory === 'all' ? {} : { category: activeCategory };
 
-    fetch(url)
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) setProducts(data.data);
+    getAllProducts(params)
+      .then(res => {
+        if (res.data.success) setProducts(res.data.data);
         setLoading(false);
       })
       .catch(() => setLoading(false));
   }, [activeCategory]);
+
+  const handleAddToCart = async (product) => {
+    if (!token) {
+      toast.warning('Vui lòng đăng nhập để thêm giỏ hàng!');
+      navigate('/login');
+      return;
+    }
+    try {
+      await addItem(product.id, 1);
+      toast.success(`Đã thêm "${product.name}" vào giỏ hàng!`);
+    } catch {
+      toast.error('Thêm giỏ hàng thất bại!');
+    }
+  };
 
   const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -91,7 +110,10 @@ export default function HomePage() {
 
                 {/* ✅ Nút nằm ngoài Link */}
                 <div className="px-3 pb-3">
-                  <button className="w-full bg-blue-600 text-white text-sm py-1.5 rounded-lg hover:bg-blue-700">
+                  <button
+                    onClick={() => handleAddToCart(product)}
+                    className="w-full bg-blue-600 text-white text-sm py-1.5 rounded-lg hover:bg-blue-700"
+                  >
                     Thêm giỏ hàng
                   </button>
                 </div>
