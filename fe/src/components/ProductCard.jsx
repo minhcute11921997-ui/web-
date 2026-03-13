@@ -17,8 +17,10 @@ const ProductCard = ({ product }) => {
     try {
       await addItem(product.id, 1);
       toast.success('Đã thêm vào giỏ hàng!');
-    } catch {
-      toast.error('Có lỗi xảy ra!');
+    } catch (error) {
+      console.error('Add to cart error:', error);
+      const errorMsg = error?.message || 'Có lỗi xảy ra!';
+      toast.error(errorMsg);
     }
   };
 

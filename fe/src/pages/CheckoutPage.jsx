@@ -22,8 +22,9 @@ const CheckoutPage = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (response.data.success) {
-                setCartItems(response.data.data || []);
-                calculateTotal(response.data.data || []);
+                const items = response.data.data?.items || [];
+                setCartItems(items);
+                calculateTotal(items);
             }
         } catch (error) {
             console.error('Lỗi lấy giỏ hàng:', error);

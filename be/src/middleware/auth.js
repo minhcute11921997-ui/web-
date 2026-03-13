@@ -3,10 +3,14 @@ const jwt = require('jsonwebtoken');
 // Middleware kiểm tra access token
 exports.verifyToken = (req, res, next) => {
     try {
+        console.log('=== Verify Token ===');
+        console.log('Authorization header:', req.headers.authorization);
+        
         // Lấy token từ header Authorization
         const authHeader = req.headers.authorization;
         
         if (!authHeader) {
+            console.log('No auth header');
             return res.status(401).json({ 
                 success: false, 
                 message: 'Vui lòng đăng nhập để tiếp tục' 
@@ -15,8 +19,10 @@ exports.verifyToken = (req, res, next) => {
 
         
         const token = authHeader.split(' ')[1];
+        console.log('Token:', token ? `${token.substring(0, 20)}...` : 'undefined');
         
         if (!token) {
+            console.log('Token not found');
             return res.status(401).json({ 
                 success: false, 
                 message: 'Token không hợp lệ' 
@@ -24,6 +30,7 @@ exports.verifyToken = (req, res, next) => {
         }
 
         // Verify token
+        console.log('JWT_SECRET:', process.env.JWT_SECRET ? 'defined' : 'UNDEFINED!');
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         console.log('Decoded token:', decoded); 
         
@@ -33,7 +40,8 @@ exports.verifyToken = (req, res, next) => {
         next();
         
     } catch (error) {
-        console.error('Lỗi verify token:', error);
+        console.error('=== Lỗi verify token ===');
+        console.error('Error:', error.message);
         
         if (error.name === 'TokenExpiredError') {
             return res.status(401).json({ 

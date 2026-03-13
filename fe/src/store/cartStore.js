@@ -9,7 +9,7 @@ const useCartStore = create((set, get) => ({
     set({ loading: true });
     try {
       const res = await getCart();
-      set({ items: res.data.items || res.data || [] });
+      set({ items: res.data.data?.items || [] });
     } catch {
       set({ items: [] });
     } finally {
@@ -18,8 +18,24 @@ const useCartStore = create((set, get) => ({
   },
 
   addItem: async (productId, quantity) => {
-    await addToCart({ productId, quantity });
-    get().fetchCart();
+    try {
+      const res = await addToCart({ productId, quantity });
+      console.log('addToCart response:', res.data);
+      if (res.data.success) {
+        try {
+          await get().fetchCart();
+        } catch (fetchError) {
+          console.warn('fetchCart failed after addToCart:', fetchError);
+          // Don't throw, just log - cart was added successfully
+        }
+      } else {
+        throw new Error(res.data.message || 'Thêm giỏ hàng thất bại');
+      }
+    } catch (error) {
+      console.error('addItem error:', error);
+      const errorMsg = error.response?.data?.message || error.message || 'Lỗi không xác định';
+      throw new Error(errorMsg);
+    }
   },
 
   updateItem: async (id, quantity) => {

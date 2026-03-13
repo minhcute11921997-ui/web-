@@ -10,7 +10,7 @@ const PaymentSuccessPage = () => {
     const { token } = useAuthStore();
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [status, setStatus] = useState('checking'); // checking, success, failed
+    const [status, setStatus] = useState('checking');
 
     const orderId = searchParams.get('orderId');
     const paymentMethod = searchParams.get('method') || 'cod';

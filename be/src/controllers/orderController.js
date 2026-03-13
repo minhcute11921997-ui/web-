@@ -21,9 +21,16 @@ exports.createOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Vui lòng nhập địa chỉ giao hàng' });
     }
 
+    // Lấy cart_id của user
+    const [carts] = await db.query('SELECT id FROM cart WHERE user_id = ?', [req.user.userId]);
+    if (carts.length === 0) {
+      return res.status(400).json({ success: false, message: 'Giỏ hàng trống' });
+    }
+    const cartId = carts[0].id;
+
     const [items] = await db.query(
-      'SELECT ci.*, p.price, p.stock, p.name FROM cart_items ci JOIN products p ON ci.product_id = p.id WHERE ci.user_id = ?',
-      [req.user.userId]
+      'SELECT ci.*, p.price, p.stock, p.name FROM cart_items ci JOIN products p ON ci.product_id = p.id WHERE ci.cart_id = ?',
+      [cartId]
     );
 
     if (items.length === 0) {
@@ -57,7 +64,7 @@ exports.createOrder = async (req, res) => {
       );
     }
 
-    await db.query('DELETE FROM cart_items WHERE user_id = ?', [req.user.userId]);
+    await db.query('DELETE FROM cart_items WHERE cart_id = ?', [cartId]);
 
     res.status(201).json({ success: true, message: 'Đặt hàng thành công!', orderId: order.insertId });
   } catch (error) {

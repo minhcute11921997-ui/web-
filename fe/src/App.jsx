@@ -4,6 +4,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 import Navbar from "./components/Navbar";
 import PrivateRoute from "./components/PrivateRoute";
+import { useAuthInit } from "./hooks/useAuthInit";
 
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
@@ -32,6 +33,8 @@ const BannerPlaceholder = ({ title, to }) => (
 );
 
 function App() {
+  useAuthInit();
+
   return (
     <BrowserRouter>
       <Navbar />

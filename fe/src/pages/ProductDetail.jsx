@@ -1,13 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import useCartStore from '../store/cartStore';
+import useAuthStore from '../store/authStore';
 
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { addItem } = useCartStore();
+  const { token } = useAuthStore();
   const [product, setProduct] = useState(null);
   const [specs, setSpecs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
+  const [addingToCart, setAddingToCart] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -32,6 +38,45 @@ const ProductDetail = () => {
 
   const formatPrice = (price) =>
     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+
+  const handleAddToCart = async () => {
+    if (!token) {
+      toast.warning('Vui lòng đăng nhập để thêm giỏ hàng!');
+      navigate('/login');
+      return;
+    }
+    
+    setAddingToCart(true);
+    try {
+      await addItem(product.id, quantity);
+      toast.success(`Đã thêm "${product.name}" (x${quantity}) vào giỏ hàng!`);
+    } catch (error) {
+      console.error('Add to cart error:', error);
+      toast.error(error?.message || 'Thêm giỏ hàng thất bại!');
+    } finally {
+      setAddingToCart(false);
+    }
+  };
+
+  const handleBuyNow = async () => {
+    if (!token) {
+      toast.warning('Vui lòng đăng nhập để mua hàng!');
+      navigate('/login');
+      return;
+    }
+
+    setAddingToCart(true);
+    try {
+      await addItem(product.id, quantity);
+      toast.success(`Đã thêm "${product.name}" (x${quantity}) vào giỏ hàng!`);
+      navigate('/cart');
+    } catch (error) {
+      console.error('Buy now error:', error);
+      toast.error(error?.message || 'Lỗi khi thêm vào giỏ hàng!');
+    } finally {
+      setAddingToCart(false);
+    }
+  };
 
   if (loading) return <div className="flex justify-center items-center min-h-screen text-gray-500">Đang tải...</div>;
   if (!product) return <div className="flex justify-center items-center min-h-screen text-gray-500">Không tìm thấy sản phẩm</div>;
@@ -86,13 +131,17 @@ const ProductDetail = () => {
 
           {/* Buttons */}
           <div className="flex gap-3 mt-2">
-            <button disabled={product.stock === 0}
+            <button 
+              disabled={product.stock === 0 || addingToCart}
+              onClick={handleAddToCart}
               className="flex-1 py-3 rounded-xl border-2 border-orange-500 text-orange-500 font-semibold hover:bg-orange-50 transition disabled:opacity-40 disabled:cursor-not-allowed">
-              🛒 Thêm vào giỏ
+              🛒 {addingToCart ? 'Đang thêm...' : 'Thêm vào giỏ'}
             </button>
-            <button disabled={product.stock === 0}
+            <button 
+              disabled={product.stock === 0 || addingToCart}
+              onClick={handleBuyNow}
               className="flex-1 py-3 rounded-xl bg-red-500 text-white font-semibold hover:bg-red-600 transition disabled:opacity-40 disabled:cursor-not-allowed">
-              Mua ngay
+              {addingToCart ? 'Đang xử lý...' : 'Mua ngay'}
             </button>
           </div>
         </div>

@@ -221,8 +221,10 @@ export default function HomePage() {
     try {
       await addItem(product.id, 1);
       toast.success(`Đã thêm "${product.name}" vào giỏ hàng!`);
-    } catch {
-      toast.error('Thêm giỏ hàng thất bại!');
+    } catch (error) {
+      console.error('Add to cart error:', error);
+      const errorMsg = error?.message || 'Thêm giỏ hàng thất bại!';
+      toast.error(errorMsg);
     }
   };
 
