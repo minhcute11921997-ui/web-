@@ -29,7 +29,7 @@ exports.createOrder = async (req, res) => {
 
         const cartId = carts[0].id;
 
-        // Lấy các sản phẩm trong giỏ (chỉ lấy items được chọn nếu có cartItemIds)
+        // Lấy các sản phẩm trong giỏ 
         let cartItems;
         if (cartItemIds && cartItemIds.length > 0) {
             const placeholders = cartItemIds.map(() => '?').join(',');
