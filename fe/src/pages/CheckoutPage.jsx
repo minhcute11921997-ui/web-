@@ -14,6 +14,30 @@ const CheckoutPage = () => {
     const [paymentMethod, setPaymentMethod] = useState('cod');
     const [discountCode, setDiscountCode] = useState('');
     const [discountAmount, setDiscountAmount] = useState(0);
+    
+    // Delivery info
+    const [customerName, setCustomerName] = useState('');
+    const [customerPhone, setCustomerPhone] = useState('');
+    const [customerAddress, setCustomerAddress] = useState('');
+    const [customerNotes, setCustomerNotes] = useState('');
+    const [shippingFee, setShippingFee] = useState(0);
+
+    const calculateShippingFee = (address) => {
+        if (!address) {
+            setShippingFee(0);
+            return;
+        }
+        
+        // Check if address contains Hà Nội, Ha Noi, HN, Hanoi
+        const hanoi = ['hà nội', 'ha noi', 'hn', 'hanoi', 'hànội'];
+        const isHanoi = hanoi.some(city => address.toLowerCase().includes(city));
+        
+        if (isHanoi) {
+            setShippingFee(50000);
+        } else {
+            setShippingFee(100000);
+        }
+    };
 
     useEffect(() => {
         if (token) {
@@ -37,9 +61,10 @@ const CheckoutPage = () => {
                 totalPrice
             );
             
-            const { discount, description } = response.data;
-            setDiscountAmount(discount);
-            toast.success(`Áp dụng thành công! ${description}`);
+            const { data } = response.data;
+            const discountValue = Number(data.discountAmount) || 0;
+            setDiscountAmount(discountValue);
+            toast.success(`Áp dụng thành công! ${data.description}`);
         } catch (error) {
             toast.error(error.response?.data?.message || 'Mã giảm giá không hợp lệ');
             setDiscountAmount(0);
@@ -170,32 +195,66 @@ const CheckoutPage = () => {
                                 </div>
                             )}
                         </div>
+
+                        {/* Delivery Information Form */}
+                        <div className="bg-white rounded-lg shadow-md p-6 mt-6">
+                            <h2 className="text-xl font-bold mb-6">Thông tin giao hàng</h2>
+                            
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Tên người nhận</label>
+                                    <input
+                                        type="text"
+                                        value={customerName}
+                                        onChange={(e) => setCustomerName(e.target.value)}
+                                        placeholder="Nhập tên người nhận"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Số điện thoại</label>
+                                    <input
+                                        type="tel"
+                                        value={customerPhone}
+                                        onChange={(e) => setCustomerPhone(e.target.value)}
+                                        placeholder="Nhập số điện thoại"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Địa chỉ giao hàng</label>
+                                    <textarea
+                                        value={customerAddress}
+                                        onChange={(e) => {
+                                            setCustomerAddress(e.target.value);
+                                            calculateShippingFee(e.target.value);
+                                        }}
+                                        placeholder="Nhập địa chỉ giao hàng"
+                                        rows="3"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Ghi chú đơn hàng</label>
+                                    <textarea
+                                        value={customerNotes}
+                                        onChange={(e) => setCustomerNotes(e.target.value)}
+                                        placeholder="Nhập ghi chú (tuỳ chọn)"
+                                        rows="2"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                                    />
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Tóm tắt thanh toán */}
                     <div className="lg:col-span-1">
                         <div className="bg-white rounded-lg shadow-md p-6 sticky top-4">
                             <h2 className="text-xl font-bold mb-6">Phương Thức Thanh Toán</h2>
-
-                            {/* Tổng tiền */}
-                            <div className="mb-8 pb-6 border-b">
-                                <div className="flex justify-between mb-2">
-                                    <span>Tạm tính:</span>
-                                    <span className="font-semibold">
-                                        {totalPrice.toLocaleString('vi-VN')} ₫
-                                    </span>
-                                </div>
-                                <div className="flex justify-between mb-2">
-                                    <span>Phí vận chuyển:</span>
-                                    <span className="font-semibold text-green-600">Miễn phí</span>
-                                </div>
-                                <div className="flex justify-between text-lg font-bold pt-2">
-                                    <span>Tổng:</span>
-                                    <span className="text-blue-600">
-                                        {totalPrice.toLocaleString('vi-VN')} ₫
-                                    </span>
-                                </div>
-                            </div>
 
                             {/* Discount Code Input */}
                             <div className="mb-6 pb-6 border-b border-gray-200">
@@ -217,18 +276,30 @@ const CheckoutPage = () => {
                                 </div>
                             </div>
 
-                            {discountAmount > 0 && (
-                                <div className="mb-4 flex justify-between text-green-600">
-                                    <span>Giảm giá:</span>
-                                    <span className="font-semibold">-{discountAmount.toLocaleString('vi-VN')}₫</span>
+                            {/* Thành tiền */}
+                            <div className="mb-6 pb-6 border-b border-gray-200">
+                                <div className="flex justify-between mb-3">
+                                    <span className="text-gray-600">Tạm tính:</span>
+                                    <span className="font-semibold">
+                                        {Number(totalPrice).toLocaleString('vi-VN')} ₫
+                                    </span>
                                 </div>
-                            )}
-
-                            <div className="border-t border-gray-200 pt-4 mb-6">
-                                <div className="flex justify-between text-lg font-bold">
+                                <div className="flex justify-between mb-3">
+                                    <span className="text-gray-600">Phí vận chuyển:</span>
+                                    <span className="font-semibold">
+                                        {shippingFee === 0 ? 'Chưa xác định' : `${Number(shippingFee).toLocaleString('vi-VN')} ₫`}
+                                    </span>
+                                </div>
+                                {Number(discountAmount) > 0 && (
+                                    <div className="flex justify-between mb-3">
+                                        <span className = "text-gray-600">Giảm giá:</span>
+                                        <span className="font-semibold">-{Number(discountAmount).toLocaleString('vi-VN')}₫</span>
+                                    </div>
+                                )}
+                                <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-200">
                                     <span>Thành tiền:</span>
                                     <span className="text-blue-600">
-                                        {(totalPrice - discountAmount).toLocaleString('vi-VN')} ₫
+                                        {(Number(totalPrice) + Number(shippingFee) - Number(discountAmount)).toLocaleString('vi-VN')} ₫
                                     </span>
                                 </div>
                             </div>
