@@ -29,11 +29,22 @@ exports.createOrder = async (req, res) => {
 
         const cartId = carts[0].id;
 
-        // Lấy các sản phẩm trong giỏ
-        const [cartItems] = await db.query(
-            'SELECT ci.*, p.price FROM cart_items ci JOIN products p ON ci.product_id = p.id WHERE ci.cart_id = ?',
-            [cartId]
-        );
+        // Lấy các sản phẩm trong giỏ (chỉ lấy items được chọn nếu có cartItemIds)
+        let cartItems;
+        if (cartItemIds && cartItemIds.length > 0) {
+            const placeholders = cartItemIds.map(() => '?').join(',');
+            [cartItems] = await db.query(
+                `SELECT ci.*, p.price FROM cart_items ci 
+                 JOIN products p ON ci.product_id = p.id 
+                 WHERE ci.cart_id = ? AND ci.id IN (${placeholders})`,
+                [cartId, ...cartItemIds]
+            );
+        } else {
+            [cartItems] = await db.query(
+                'SELECT ci.*, p.price FROM cart_items ci JOIN products p ON ci.product_id = p.id WHERE ci.cart_id = ?',
+                [cartId]
+            );
+        }
 
         if (cartItems.length === 0) {
             return res.status(400).json({
@@ -75,7 +86,7 @@ exports.createOrder = async (req, res) => {
                 orderId: orderId,
                 totalPrice: totalPrice,
                 paymentMethod: 'cod',
-                paymentUrl: null // COD không cần redirect
+                paymentUrl: null
             });
         } else if (paymentMethod === 'vnpay') {
             // VNPay: Tạo URL thanh toán
@@ -97,8 +108,16 @@ exports.createOrder = async (req, res) => {
             });
         }
 
-        // Xóa giỏ hàng
-        await db.query('DELETE FROM cart_items WHERE cart_id = ?', [cartId]);
+        // Chỉ xóa các cart_items đã được thanh toán (items được chọn)
+        if (cartItemIds && cartItemIds.length > 0) {
+            const placeholders = cartItemIds.map(() => '?').join(',');
+            await db.query(
+                `DELETE FROM cart_items WHERE cart_id = ? AND id IN (${placeholders})`,
+                [cartId, ...cartItemIds]
+            );
+        } else {
+            await db.query('DELETE FROM cart_items WHERE cart_id = ?', [cartId]);
+        }
 
     } catch (error) {
         console.error('Lỗi tạo order:', error);
@@ -116,7 +135,6 @@ exports.createOrder = async (req, res) => {
  */
 exports.vnpayCallback = async (req, res) => {
     try {
-        // Xác minh response từ VNPay
         const verifyResult = verifyVNPayResponse(req.query);
 
         if (!verifyResult.isValid) {
@@ -126,9 +144,7 @@ exports.vnpayCallback = async (req, res) => {
             });
         }
 
-        // Kiểm tra response code
         if (verifyResult.responseCode !== '00') {
-            // Thanh toán thất bại
             await db.query(
                 `UPDATE orders SET payment_status = ?, transaction_id = ? WHERE id = ?`,
                 ['failed', verifyResult.transactionNo, verifyResult.orderId]
@@ -140,11 +156,9 @@ exports.vnpayCallback = async (req, res) => {
             });
         }
 
-        // Thanh toán thành công
         const orderId = verifyResult.orderId;
         const amount = verifyResult.amount;
 
-        // Cập nhật order
         await db.query(
             `UPDATE orders SET payment_status = ?, order_status = ?, transaction_id = ? WHERE id = ?`,
             ['completed', 'processing', verifyResult.transactionNo, orderId]
@@ -177,7 +191,6 @@ exports.getPaymentStatus = async (req, res) => {
         const { orderId } = req.params;
         const userId = req.user.userId;
 
-        // Kiểm tra order tồn tại và thuộc về user
         const [orders] = await db.query(
             `SELECT * FROM orders WHERE id = ? AND user_id = ?`,
             [orderId, userId]
@@ -224,7 +237,6 @@ exports.confirmCOD = async (req, res) => {
         const { orderId } = req.body;
         const userId = req.user.userId;
 
-        // Kiểm tra order
         const [orders] = await db.query(
             `SELECT * FROM orders WHERE id = ? AND user_id = ? AND payment_method = 'cod'`,
             [orderId, userId]
@@ -246,7 +258,6 @@ exports.confirmCOD = async (req, res) => {
             });
         }
 
-        // Cập nhật trạng thái
         await db.query(
             `UPDATE orders SET payment_status = ?, order_status = ? WHERE id = ?`,
             ['completed', 'processing', orderId]
