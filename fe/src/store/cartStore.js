@@ -11,9 +11,16 @@ const useCartStore = create((set, get) => ({
     try {
       const res = await getCart();
       const items = res.data.data?.items || [];
-      set({ items });
-      // Auto-select all items when cart is fetched
-      set({ selectedItems: items.map(item => item.id) });
+      const currentSelected = get().selectedItems;
+
+      // Nếu chưa có selection nào (lần đầu load) → auto-select tất cả
+      // Nếu đã có selection rồi → giữ nguyên, chỉ loại bỏ id không còn tồn tại
+      const newItemIds = items.map(item => item.id);
+      const updatedSelected = currentSelected.length === 0
+        ? newItemIds
+        : currentSelected.filter(id => newItemIds.includes(id));
+
+      set({ items, selectedItems: updatedSelected });
     } catch {
       set({ items: [], selectedItems: [] });
     } finally {
@@ -30,7 +37,6 @@ const useCartStore = create((set, get) => ({
           await get().fetchCart();
         } catch (fetchError) {
           console.warn('fetchCart failed after addToCart:', fetchError);
-          // Don't throw, just log - cart was added successfully
         }
       } else {
         throw new Error(res.data.message || 'Thêm giỏ hàng thất bại');
