@@ -12,7 +12,5 @@ router.get('/vnpay-callback', paymentController.vnpayCallback);
 // GET /api/payments/:orderId - Lấy trạng thái thanh toán
 router.get('/:orderId', verifyToken, paymentController.getPaymentStatus);
 
-// POST /api/payments/confirm-cod - Xác nhận COD
-router.post('/confirm-cod', verifyToken, paymentController.confirmCOD);
 
 module.exports = router;

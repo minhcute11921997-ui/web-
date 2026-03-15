@@ -177,8 +177,8 @@ const CheckoutPage = () => {
                                             rows="3"
                                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" />
                                         {shippingFee > 0 && (
-                                            <p className="text-sm text-green-600 mt-1">
-                                                📦 Phí vận chuyển: <strong>{shippingFee.toLocaleString('vi-VN')} ₫</strong>
+                                            <p className="text-sm text-blue-700 mt-1">
+                                                 Phí vận chuyển: <strong>{shippingFee.toLocaleString('vi-VN')} ₫</strong>
                                                 {shippingFee === 50000 ? ' (Nội thành Hà Nội)' : ' (Tỉnh thành khác)'}
                                             </p>
                                         )}
@@ -228,8 +228,8 @@ const CheckoutPage = () => {
                                         </span>
                                     </div>
                                     {discountAmount > 0 && (
-                                        <div className="flex justify-between text-green-600">
-                                            <span>Giảm giá:</span>
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600" >Giảm giá:</span>
                                             <span className="font-semibold">-{discountAmount.toLocaleString('vi-VN')} ₫</span>
                                         </div>
                                     )}
@@ -248,7 +248,7 @@ const CheckoutPage = () => {
                                             onChange={e => setPaymentMethod(e.target.value)}
                                             className="w-4 h-4" />
                                         <div className="ml-3">
-                                            <p className="font-semibold">💵 Tiền Mặt (COD)</p>
+                                            <p className="font-semibold"> Tiền Mặt</p>
                                             <p className="text-sm text-gray-500">Thanh toán khi nhận hàng</p>
                                         </div>
                                     </label>
@@ -259,7 +259,7 @@ const CheckoutPage = () => {
                                             onChange={e => setPaymentMethod(e.target.value)}
                                             className="w-4 h-4" />
                                         <div className="ml-3">
-                                            <p className="font-semibold">🏦 VNPay</p>
+                                            <p className="font-semibold"> VNPay</p>
                                             <p className="text-sm text-gray-500">Thẻ ngân hàng, ví điện tử</p>
                                         </div>
                                     </label>

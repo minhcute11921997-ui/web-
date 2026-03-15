@@ -60,10 +60,6 @@ function App() {
               <Route path="/products/:id" element={<ProductDetail />} />
 
               {/* Cần đăng nhập */}
-<<<<<<< HEAD
-
-=======
->>>>>>> ecdea6535cb3435dc74a3e58e84b2c3175fc6cb7
               <Route
                 path="/cart"
                 element={
